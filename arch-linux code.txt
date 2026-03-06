@@ -24,7 +24,7 @@
 
 язык
 
-6 nano /etc/locale.gen (войдите и найдите эти языки и стирайте решотку # вот языки для русского и английского (ru_RU.UTF-8 UTF-8 и en_US.UTF-8 UTF-8)
+6 nano /etc/locale.gen (войдите и впишите эти коды 1 строка и 2 строка (ru_RU.UTF-8 UTF-8 и en_US.UTF-8 UTF-8)
 6.1 locale-gen
 6.2 echo "LANG=ru_RU.UTF-8" > /etc/locale.conf
 
@@ -107,6 +107,7 @@ exit
 umount -R /mnt
 
 reboot
+
 
 
 
