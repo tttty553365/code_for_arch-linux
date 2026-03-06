@@ -12,10 +12,10 @@
 
 3 pacstrap -K /mnt base base-devel linux linux-headers linux-firmware amd-ucode networkmanager git nano bluez bluez-utils (это команда сделает все для системы и защита от сбоев)
 3.1 genfstab -U /mnt >> /mnt/etc/fstab (нужный код)
-
+  
 вход в систему
 
-4 arch_chroot /mnt (вход в систему)
+4 arch-chroot /mnt (вход в систему)
 
 настройка времени и даты
 
@@ -107,6 +107,7 @@ exit
 umount -R /mnt
 
 reboot
+
 
 
 
