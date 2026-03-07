@@ -61,7 +61,7 @@ pacman -S ntfs-3g gvfs bash-completion unzip zip p7zip unrar libxkbcommon
 code = 9
 
 su - имя_юзера
-git clone https://aur.archlinux.org
+git clone https://aur.archlinux.org/yay.git
 cd yay
 makepkg -si
 cd ..
@@ -76,3 +76,4 @@ localectl set-x11-keymap us,ru pc105 "" grp:alt_space_toggle
 exit # Выход из chroot
 umount -R /mnt
 reboot
+
