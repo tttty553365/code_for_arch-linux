@@ -1,127 +1,78 @@
-
 код для старых дос dos (не для efi)
 
-монтирование.разметка.форматирование
+code = 1
 
-1 cfdisk - (настройте диск разделы)
-2 lsblk - (посмотрите список имен и разделов | у вас может быть другой имя а не как sda вот пример sdb)
-2.1 (сделайте его как ext4 файловая система например) -- mkfs.ext4 /dev/sda <(нумерация раздела)
-2.2 (примантируйте диск например) -- mount /dev/sda (< нумерация) /mnt
+cfdisk /dev/sda  # Выбирай тип 'dos'
+mkfs.ext4 /dev/sda1
+mount /dev/sda1 /mnt
 
-установка нужных компонентов и файловых данных для будущего исползывания
+code = 2
 
-3 pacstrap -K /mnt base base-devel linux linux-headers linux-firmware amd-ucode networkmanager git nano bluez bluez-utils (это команда сделает все для системы и защита от сбоев)
-3.1 genfstab -U /mnt >> /mnt/etc/fstab (нужный код)
-  
-вход в систему
+pacstrap -K /mnt base base-devel linux linux-headers linux-firmware amd-ucode intel-ucode networkmanager git nano bluez bluez-utils
+genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
 
-4 arch-chroot /mnt (вход в систему)
+код = 3
 
-настройка времени и даты
+ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+hwclock --systohc
 
-5 ln -sf /usr/share/zoneinfo/Region/City /etc/localtime (где регион и город пиши свой нпример Europe/Moscow)
-5.1 hwclock --systohc
+# В nano впиши: en_US.UTF-8 UTF-8 и ru_RU.UTF-8 UTF-8
+nano /etc/locale.gen
+locale-gen
+echo "LANG=ru_RU.UTF-8" > /etc/locale.conf
 
-язык
+code = 4
 
-6 nano /etc/locale.gen (войдите и впишите эти коды 1 строка и 2 строка (ru_RU.UTF-8 UTF-8 и en_US.UTF-8 UTF-8)
-6.1 locale-gen
-6.2 echo "LANG=ru_RU.UTF-8" > /etc/locale.conf
+useradd -m -G wheel имя_юзера
+passwd имя_юзера
+pacman -S sudo
+# В visudo убери # перед %wheel ALL=(ALL:ALL) ALL
+EDITOR=nano visudo
 
-создание узера и пороля
+code = 5
 
-7 useradd -m -G wheel имя_юзера
-7.1 passswd имя_юзера (вас попросят создать пароль а потом записать его снова)
+pacman -S grub
+grub-install --target=i386-pc /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
 
-установка sudo и создание суперпользавателя
+code = 6
 
-8 pacman -S sudo
-8.1 EDITOR=nano visudo
-8.2 (Листай вниз пока не найдешь вот эту строку) # %wheel ALL=(ALL:ALL) ALL (и убери решотку#) (затем сделай сочетание клавиш Ctrl+O, Enter, Ctrl+X)
+systemctl enable NetworkManager
+systemctl enable systemd-timesyncd
+echo "kernel.sysrq = 1" > /etc/sysctl.d/99-sysctl.conf
+pacman -S pacman-contrib
+systemctl enable paccache.timer
+systemctl enable fstrim.timer
 
-создаем мозги нашим процессорам чтобы небыло ошибок 
+code = 7
 
-9 (для интел) pacman -S intel-ucode
-9.1 (для амд) pacman -S amd-ucode
+# Установка всего интерфейса разом
+pacman -S xorg-server lxqt sddm openbox pavucontrol-qt qterminal pcmanfm-qt lxqt-archiver lxqt-policykit nm-connection-editor
+pacman -S lxappearance-obconf lxqt-qtplugin qt6ct lib32-gtk2 gtk-engine-murrine
+pacman -S ttf-liberation ttf-dejavu noto-fonts
+systemctl enable sddm
 
-создаем grub чтобы при запуске мы могли выберать ос
+code = 8
 
-10 pacman -S grub
-10.1 grub-install --target=i386-pc /dev/sda 
-10.2 grub-mkconfig -o /boot/grub/grub.cf
+pacman -S pipewire pipewire-pulse pipewire-alsa wireplumber
+pacman -S ntfs-3g gvfs bash-completion unzip zip p7zip unrar libxkbcommon
 
-автозагрузка компанентов, безопасность системы, и нужныедействие для системы
+code = 9
 
-11 systemctl enable NetworkManager
-11.1 systemctl enable systemd-timesyncd
-11.2 echo "kernel.sysrq = 1" > /etc/sysctl.d/99-sysctl.conf
-11.3 pacman -S pacman-contrib
-11.4 systemctl enable paccache.timer
-11.5 systemctl enable fstrim.timer
-11.6 pacman -S --needed base-devel git
+su - имя_юзера
+git clone https://aur.archlinux.org
+cd yay
+makepkg -si
+cd ..
+rm -rf yay
+exit # Возврат в root
 
-создание рабочего стола (графический интерфейс)
+code = 10
 
-12 pacman -S xorg-server lxqt sddm openbox pavucontrol-qt qterminal pcmanfm-qt
-12.1 pacman -S ttf-liberation ttf-dejavu
-12.2 systemctl enable sddm
+# Эту команду можно ввести и сейчас, и после перезагрузки
+localectl set-x11-keymap us,ru pc105 "" grp:alt_space_toggle
 
-звук для воспроизведения
-
-13 pacman -S pipewire pipewire-pulse pipewire-alsa wireplumber
-
-подержка файловых систем (обычно для флешак)
-
-14 pacman -S ntfs-3g gvfs
-
-авто-пополнение (bash консоли через клавишу tab)
-
-15 pacman -S bash-completion
-
-архиваторы
-
-16pacman -S unzip zip p7zip unrar
-
-автозагрузка окружения
-
-17 systemctl enable sddm
-18 pacman -S lxqt-session
-
-управление звуком и языком на трее
-
-19 pacman -S pulseaudio-alsa pavucontrol-qt
-20 pacman -S libxkbcommon
-
-нужный компонент 
-
-21 pacman -S --needed base-devel git
-21.1 Прыгаем в твоего юзера (замени имя_юзера на свое) su - имя_юзера
-21.2 https://aur.archlinux.org/yay.git
-21.3 cd yay
-21.4 makepkg -si
-
-выход
-
-exit 
-
+exit # Выход из chroot
 umount -R /mnt
-
 reboot
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
